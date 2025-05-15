@@ -4,14 +4,15 @@ import os
 
 # 定义要测试的程序
 serial_program = "./life-serial"
-parallel_program = "./life-parallel-3threads"
+parallel_program = "./life-parallel-6threads"
 
 # 定义要测试的步数
 steps_list = [10, 50, 100, 500, 1000]
 
 # 定义要测试的初始环境
 # environments = ["input/23334m", "input/make-a", "input/o0075", "input/o0045-gun", "input/puf-qb-c3"]
-environments = ["input/100_40", "input/500_40", "input/1000_40", "input/1500_40", "input/2000_40", "input/3000_40", "input/4000_40"]
+environments = ["input/100_40", "input/500_40", "input/1000_40", "input/1500_40", "input/2000_40", "input/3000_40", "input/4000_40", \
+                "input/5000_40", "input/6000_40", "input/7000_40", "input/8000_40", "input/9000_40", "input/10000_40"]
 
 # 定义重复执行的次数
 num_repetitions = 3
@@ -40,7 +41,7 @@ for steps in steps_list:
         # 重复执行 serial 程序并记录时间
         print(f"  执行 {serial_program} {num_repetitions} 次...")
         for i in range(num_repetitions):
-            serial_command = ["taskset -c 0,1,2 ", serial_program, str(steps), env]
+            serial_command = [serial_program, str(steps), env]
             start_time = time.time()
             try:
                 subprocess.run(serial_command, check=True, capture_output=True)

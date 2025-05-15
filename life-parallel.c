@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdio.h>
+#include <time.h>
 
 typedef struct {
     int numWork;                // Line available to compute, which must not less than 0
@@ -10,7 +11,8 @@ typedef struct {
     int ret;                    // Flag to return
     int threads;                // Number of threads
     pthread_mutex_t mutex;      // Mutex
-    pthread_cond_t cv;          // Wait function
+    pthread_cond_t worker_cv;   // Worker condition variable
+    pthread_cond_t main_cv;     // Main thread condition variable
     LifeBoard* state;           // State to observe
     LifeBoard* next_state;      // New state
 } META;
@@ -34,7 +36,7 @@ void* threadfunc(void* args){
         int mywork=-1;
         pthread_mutex_lock(&metaData->mutex);
         while((metaData->numWork<=0 || metaData->stop) && !metaData->ret){
-            pthread_cond_wait(&metaData->cv, &metaData->mutex);
+            pthread_cond_wait(&metaData->worker_cv, &metaData->mutex);
         }
         mywork = metaData->numWork--;
         pthread_mutex_unlock(&metaData->mutex);
@@ -56,7 +58,8 @@ void* threadfunc(void* args){
         pthread_mutex_lock(&metaData->mutex);
         metaData->compleWork++;
         if(metaData->compleWork==state->height){
-            pthread_cond_broadcast(&metaData->cv);
+            // pthread_cond_broadcast(&metaData->cv);
+            pthread_cond_broadcast(&metaData->main_cv);
         }
         pthread_mutex_unlock(&metaData->mutex);
     }
@@ -81,14 +84,15 @@ void destroy_metaData(META* metaData, pthread_t* pools){
 	//	Destroy metaData structure
 	//
     metaData->ret = 1;
-    pthread_cond_broadcast(&metaData->cv);
+    pthread_cond_broadcast(&metaData->worker_cv);
 
     void* result;
     for(int i=0; i<metaData->threads; i++){
         pthread_join(pools[i], &result);
     }
     printf("Free all threads in Pools!\n");
-	pthread_cond_destroy(&metaData->cv);
+	pthread_cond_destroy(&metaData->worker_cv);
+    pthread_cond_destroy(&metaData->main_cv);
 	pthread_mutex_destroy(&metaData->mutex);
 	return ;
 }
@@ -105,7 +109,8 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
     // Init meta data
     metaData = (META*)malloc(sizeof(META));
     pthread_mutex_init(&metaData->mutex, NULL);
-    pthread_cond_init(&metaData->cv, NULL);
+    pthread_cond_init(&metaData->worker_cv, NULL);
+    pthread_cond_init(&metaData->main_cv, NULL);
     metaData->numWork = state->height;
     metaData->compleWork = 0;
     LifeBoard* next_state = create_life_board(state->width, state->height);
@@ -122,16 +127,30 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
 
 
     for(int time=0; time<steps; time++){
+        // pthread_mutex_lock(&metaData->mutex);
+
+        // while(metaData->compleWork!=state->height){
+        //     pthread_cond_wait(&metaData->main_cv, &metaData->mutex);
+        // }
+
+        // swap(state, next_state);
+        // metaData->numWork = state->height;
+        // metaData->compleWork = 0;
+        // pthread_cond_broadcast(&metaData->worker_cv);
+
+        // pthread_mutex_unlock(&metaData->mutex);
+
+    
         // Begin
         pthread_mutex_lock(&metaData->mutex);
         metaData->stop = 0;
+        pthread_cond_broadcast(&metaData->worker_cv);
         pthread_mutex_unlock(&metaData->mutex);
-        // Broadcast
-        pthread_cond_broadcast(&metaData->cv);
+        
         // Sleep
         pthread_mutex_lock(&metaData->mutex);
         while(metaData->compleWork!=state->height){
-            pthread_cond_wait(&metaData->cv, &metaData->mutex);
+            pthread_cond_wait(&metaData->main_cv, &metaData->mutex);
         }
 
         metaData->stop = 1;
@@ -142,8 +161,9 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
     }
 
     // Free
-    destroy_life_board(next_state);
     destroy_metaData(metaData, pools);
+    destroy_life_board(next_state);
+
 }
 
 

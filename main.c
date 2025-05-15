@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "life.h"
+#include <time.h>
 
 int main(int argc, char** argv) {
     int steps = 0;
@@ -20,9 +21,12 @@ int main(int argc, char** argv) {
     FILE* in = fopen(input_file, "r");
     read_life_board(in, board);
 
-    // simulate_life_parallel(3, board, steps);
-    simulate_life_serial(board, steps);
-    print_life_board(board);
+
+    simulate_life_parallel(6, board, steps);
+    // simulate_life_serial(board, steps);
+    
+
+    // print_life_board(board);
     destroy_life_board(board);
     return 0;
 }

@@ -10,3 +10,4 @@ life-tsan
 conf/info.mk
 *.pdf
 *.zip
+demo*

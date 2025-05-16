@@ -12,8 +12,8 @@ def verify_outputs(serial_output_path, parallel_output_path):
 
 
 # 定义要测试的程序
-serial_program = "./life-multi"
-parallel_program = "./life-multi"
+serial_program = "./life-arrange"
+parallel_program = "./life-arrange"
 
 # 定义要测试的步数
 steps_list = [10, 50, 100, 500, 1000]
@@ -76,7 +76,7 @@ for steps in steps_list:
         # 重复执行 parallel 程序并记录时间
         print(f"  执行 {parallel_program} {num_repetitions} 次...")
         for i in range(num_repetitions):
-            parallel_command = [parallel_program, str(steps), env, '5', 'output/parallel.txt']
+            parallel_command = [parallel_program, str(steps), env, '4', 'output/parallel.txt']
             start_time = time.time()
             try:
                 subprocess.run(parallel_command, check=True, capture_output=True, timeout=20)

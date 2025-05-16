@@ -11,3 +11,7 @@ conf/info.mk
 *.pdf
 *.zip
 demo*
+*.md
+*.png
+*.Identifier
+*.sh

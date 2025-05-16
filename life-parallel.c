@@ -127,28 +127,11 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
 
 
     for(int time=0; time<steps; time++){
-        // pthread_mutex_lock(&metaData->mutex);
-
-        // while(metaData->compleWork!=state->height){
-        //     pthread_cond_wait(&metaData->main_cv, &metaData->mutex);
-        // }
-
-        // swap(state, next_state);
-        // metaData->numWork = state->height;
-        // metaData->compleWork = 0;
-        // pthread_cond_broadcast(&metaData->worker_cv);
-
-        // pthread_mutex_unlock(&metaData->mutex);
-
-    
         // Begin
         pthread_mutex_lock(&metaData->mutex);
         metaData->stop = 0;
         pthread_cond_broadcast(&metaData->worker_cv);
-        pthread_mutex_unlock(&metaData->mutex);
-        
-        // Sleep
-        pthread_mutex_lock(&metaData->mutex);
+
         while(metaData->compleWork!=state->height){
             pthread_cond_wait(&metaData->main_cv, &metaData->mutex);
         }

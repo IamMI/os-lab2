@@ -1,8 +1,6 @@
 #include "life.h"
 #include <pthread.h>
 #include <semaphore.h>
-#include <stdio.h>
-#include <time.h>
 
 typedef struct {
     int numWork;                // Line available to compute, which must not less than 0
@@ -90,7 +88,6 @@ void destroy_metaData(META* metaData, pthread_t* pools){
     for(int i=0; i<metaData->threads; i++){
         pthread_join(pools[i], &result);
     }
-    printf("Free all threads in Pools!\n");
 	pthread_cond_destroy(&metaData->worker_cv);
     pthread_cond_destroy(&metaData->main_cv);
 	pthread_mutex_destroy(&metaData->mutex);

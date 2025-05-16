@@ -71,20 +71,37 @@ void swap(LifeBoard* first, LifeBoard* second) {
     second->cells = temp;
 }
 
-void print_life_board(const LifeBoard* board) {
-    if (board == NULL || board->cells == NULL) {
-        fprintf(stderr, "Error: LifeBoard or cells is NULL.\n");
+// void print_life_board(const LifeBoard* board) {
+//     if (board == NULL || board->cells == NULL) {
+//         fprintf(stderr, "Error: LifeBoard or cells is NULL.\n");
+//         return;
+//     }
+    
+//     printf("%d %d\n", board->width, board->height);
+//     for (int y = 0; y < board->height; y++) {
+//         for (int x = 0; x < board->width; x++) {
+//             printf("%c", at(board, x, y) ? '*' : '.');
+//         }
+//         printf("\n");
+//     }
+// }
+void print_life_board(const LifeBoard* board, FILE* out) {
+    if (board == NULL || board->cells == NULL || out == NULL) {
+        fprintf(stderr, "Error: LifeBoard, cells, or output file is NULL.\n");
         return;
     }
-    
-    printf("%d %d\n", board->width, board->height);
+
+    fprintf(out, "%d %d\n", board->width, board->height);
     for (int y = 0; y < board->height; y++) {
         for (int x = 0; x < board->width; x++) {
-            printf("%c", at(board, x, y) ? '*' : '.');
+            fprintf(out, "%c", at(board, x, y) ? '*' : '.');
         }
-        printf("\n");
+        fprintf(out, "\n");
     }
 }
+
+
+
 
 void read_life_board(FILE* stream, LifeBoard* board) {
     int result;

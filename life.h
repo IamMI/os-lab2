@@ -20,7 +20,7 @@ int width(LifeBoard* board);
 int height(LifeBoard* board);
 int is_equal(const LifeBoard* first, const LifeBoard* second);
 void swap(LifeBoard* first, LifeBoard* second);
-void print_life_board(const LifeBoard* board);
+void print_life_board(const LifeBoard* board, FILE* out);
 void read_life_board(FILE* stream, LifeBoard* board);
 int count_live_neighbors(LifeBoard *state, int x, int y);
 int deep_copy_life_board(LifeBoard *dest, const LifeBoard *src);

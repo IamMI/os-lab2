@@ -47,18 +47,17 @@ void* threadfunc(void* args){
         LifeBoard* state = metaData->state;
         LifeBoard* next_state = metaData->next_state;
 
-        for(int x=0; x<state->width; x++){
-            int live_neighbors = count_live_neighbors(state, x, mywork-1);
-            LifeCell current_cell = at(state, x, mywork-1);
+        for(int x=1; x<state->width-1; x++){
+            int live_neighbors = count_live_neighbors(state, x, mywork);
+            LifeCell current_cell = at(state, x, mywork);
             LifeCell new_cell = (live_neighbors == 3) || (live_neighbors == 4 && current_cell == 1) ? 1 : 0;
-            set_at(next_state, x, mywork-1, new_cell);
+            set_at(next_state, x, mywork, new_cell);
         }
 
         // Completed!
         pthread_mutex_lock(&metaData->mutex);
         metaData->compleWork ++;
-        if(metaData->compleWork==state->height){
-            // pthread_cond_broadcast(&metaData->cv);
+        if(metaData->compleWork==state->height-2){
             pthread_cond_broadcast(&metaData->main_cv);
         }
         pthread_mutex_unlock(&metaData->mutex);
@@ -74,7 +73,6 @@ void create_pools(int threads, pthread_t* pools){
     
     for(int i=0; i<threads; i++){
         pthread_create(pools+i, NULL, threadfunc, NULL);
-        // printf("Create Threads: %lu\n", pools[i]);
     }
     return ;
 }
@@ -135,77 +133,76 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
     if(steps==0) return;
 
     // Init meta data
-    // metaData = (META*)malloc(sizeof(META));
-    // pthread_mutex_init(&metaData->mutex, NULL);
-    // pthread_cond_init(&metaData->worker_cv, NULL);
-    // pthread_cond_init(&metaData->main_cv, NULL);
-    // metaData->numWork = state->height;
-    // metaData->compleWork = 0;
-    // LifeBoard* next_state = create_life_board(state->width, state->height);
-    // metaData->next_state = next_state;
-    // metaData->state = state;
-    // metaData->stop = 1;
-    // metaData->ret = 0;
-    // metaData->threads = threads;
+    metaData = (META*)malloc(sizeof(META));
+    pthread_mutex_init(&metaData->mutex, NULL);
+    pthread_cond_init(&metaData->worker_cv, NULL);
+    pthread_cond_init(&metaData->main_cv, NULL);
+    metaData->numWork = state->height-2;
+    metaData->compleWork = 0;
+    LifeBoard* next_state = create_life_board(state->width, state->height);
+    metaData->next_state = next_state;
+    metaData->state = state;
+    metaData->stop = 1;
+    metaData->ret = 0;
+    metaData->threads = threads;
 
 
-    // // Create threads pool
-    // pthread_t pools[MAX_THREADS];
-    // create_pools(threads, pools);
+    // Create threads pool
+    pthread_t pools[MAX_THREADS];
+    create_pools(threads, pools);
 
 
-    // for(int time=0; time<steps; time++){
-    //     // Begin
-    //     pthread_mutex_lock(&metaData->mutex);
-    //     metaData->stop = 0;
-    //     pthread_cond_broadcast(&metaData->worker_cv);
+    for(int time=0; time<steps; time++){
+        // Begin
+        pthread_mutex_lock(&metaData->mutex);
+        metaData->stop = 0;
+        pthread_cond_broadcast(&metaData->worker_cv);
         
-    //     while(metaData->compleWork!=state->height){
-    //         pthread_cond_wait(&metaData->main_cv, &metaData->mutex);
-    //     }
+        while(metaData->compleWork!=state->height-2){
+            pthread_cond_wait(&metaData->main_cv, &metaData->mutex);
+        }
 
-    //     metaData->stop = 1;
-    //     swap(state, next_state);
-    //     metaData->numWork = state->height;
-    //     metaData->compleWork = 0;
-    //     pthread_mutex_unlock(&metaData->mutex);
-    // }
+        metaData->stop = 1;
+        swap(state, next_state);
+        metaData->numWork = state->height-2;
+        metaData->compleWork = 0;
+        pthread_mutex_unlock(&metaData->mutex);
+    }
 
     // Free
-    // destroy_metaData(metaData, pools);
-    // destroy_life_board(next_state);
-
-    LifeBoard* next_state = create_life_board(state->width, state->height);
-    pthread_t t[MAX_THREADS];
-    MD* metaData[MAX_THREADS];
-    for(int i=0; i<threads; i++){
-        metaData[i] = (MD*)malloc(sizeof(MD));
-        metaData[i]->index = i;
-        metaData[i]->num = threads;
-        metaData[i]->state = state;
-        metaData[i]->next_state = next_state;
-    }
-
-    for(int _=0; _<steps; _++){
-        for(int i=0; i<threads; i++){
-            pthread_create(t+i, NULL, func, (void*)(metaData[i]));
-        }
-
-        void* result;
-        for(int i=0; i<threads; i++){
-            pthread_join(t[i], &result);
-        }
-
-        swap(state, next_state);
-
-    }
-
-    
-    for(int i=0; i<threads; i++){
-        free(metaData[i]);       
-    }
+    destroy_metaData(metaData, pools);
     destroy_life_board(next_state);
-    return;
+
+    // LifeBoard* next_state = create_life_board(state->width, state->height);
+    // pthread_t t[MAX_THREADS];
+    // MD* metaData[MAX_THREADS];
+    // for(int i=0; i<threads; i++){
+    //     metaData[i] = (MD*)malloc(sizeof(MD));
+    //     metaData[i]->index = i;
+    //     metaData[i]->num = threads;
+    //     metaData[i]->state = state;
+    //     metaData[i]->next_state = next_state;
+    // }
+
+    // for(int _=0; _<steps; _++){
+    //     for(int i=0; i<threads; i++){
+    //         pthread_create(t+i, NULL, func, (void*)(metaData[i]));
+    //     }
+
+    //     void* result;
+    //     for(int i=0; i<threads; i++){
+    //         pthread_join(t[i], &result);
+    //     }
+
+    //     swap(state, next_state);
+
+    // }
+
+    // for(int i=0; i<threads; i++){
+    //     free(metaData[i]);       
+    // }
+    // destroy_life_board(next_state);
+    // return;
 }
 
 

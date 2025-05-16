@@ -1,11 +1,19 @@
 import subprocess
 import time
 import os
+import filecmp
+
+def verify_outputs(serial_output_path, parallel_output_path):
+    try:
+        return filecmp.cmp(serial_output_path, parallel_output_path, shallow=False)
+    except Exception as e:
+        print(f"验证输出时发生错误: {e}")
+        return False
 
 
 # 定义要测试的程序
-serial_program = "./life-serial"
-parallel_program = "./life-parallel"
+serial_program = "./life-multi"
+parallel_program = "./life-multi"
 
 # 定义要测试的步数
 steps_list = [10, 50, 100, 500, 1000]
@@ -15,8 +23,6 @@ steps_list = [10, 50, 100, 500, 1000]
 # environments = ["input/23334m", "input/make-a", "input/o0075", "input/o0045-gun", "input/puf-qb-c3"]
 environments = ["input/100_40", "input/500_40", "input/1000_40", "input/1500_40", "input/2000_40", "input/3000_40", "input/4000_40", \
                 "input/5000_40", "input/6000_40", "input/7000_40", "input/8000_40", "input/9000_40", "input/10000_40"]
-
-
 
 
 # 定义重复执行的次数
@@ -46,7 +52,7 @@ for steps in steps_list:
         # 重复执行 serial 程序并记录时间
         print(f"  执行 {serial_program} {num_repetitions} 次...")
         for i in range(num_repetitions):
-            serial_command = [serial_program, str(steps), env]
+            serial_command = [serial_program, str(steps), env, '1', 'output/serial.txt']
             start_time = time.time()
             try:
                 subprocess.run(serial_command, check=True, capture_output=True, timeout=20)
@@ -70,7 +76,7 @@ for steps in steps_list:
         # 重复执行 parallel 程序并记录时间
         print(f"  执行 {parallel_program} {num_repetitions} 次...")
         for i in range(num_repetitions):
-            parallel_command = [parallel_program, str(steps), env, '2']
+            parallel_command = [parallel_program, str(steps), env, '5', 'output/parallel.txt']
             start_time = time.time()
             try:
                 subprocess.run(parallel_command, check=True, capture_output=True, timeout=20)
@@ -95,6 +101,15 @@ for steps in steps_list:
             speedup = avg_serial_time / avg_parallel_time
             results[steps][env]["speedup"] = f"{speedup:.2f}x"
             print(f"  平均加速比：{speedup:.2f}x")
+            # 验证串行和并行输出是否一致
+            match = verify_outputs("output/serial.txt", "output/parallel.txt")
+            results[steps][env]["match"] = "✅" if match else "❌"
+            if not match:
+                print("  ❌ 输出不一致！")
+                exit(0)
+            else:
+                print("  ✅ 输出一致")
+            
         else:
             results[steps][env]["speedup"] = "N/A"
 

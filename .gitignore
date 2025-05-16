@@ -13,3 +13,4 @@ conf/info.mk
 demo*
 *.png
 *.md
+*.Identifier

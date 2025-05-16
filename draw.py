@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import re
+import os
+
 
 def parse_md_table(filepath):
     """从 Markdown 文件中解析表格数据"""

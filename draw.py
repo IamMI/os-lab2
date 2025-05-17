@@ -20,8 +20,9 @@ def parse_md_table(filepath):
         env = parts[1]
         try:
             cols = int(env.split('_')[0])
+            rows = int(env.split('_')[1])
             speedup = float(parts[4].replace('x', '').strip())
-            parsed_data.append((steps, cols, speedup))
+            parsed_data.append((steps, rows, speedup))
         except ValueError:
             continue  # 忽略无法解析的行
 

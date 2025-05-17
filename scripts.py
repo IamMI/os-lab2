@@ -21,8 +21,12 @@ steps_list = [10, 50, 100, 500, 1000]
 
 # 定义要测试的初始环境
 # environments = ["input/23334m", "input/make-a", "input/o0075", "input/o0045-gun", "input/puf-qb-c3"]
-environments = ["input/100_40", "input/500_40", "input/1000_40", "input/1500_40", "input/2000_40", "input/3000_40", "input/4000_40", \
-                "input/5000_40", "input/6000_40", "input/7000_40", "input/8000_40", "input/9000_40", "input/10000_40"]
+# environments = ["input/100_40", "input/500_40", "input/1000_40", "input/1500_40", "input/2000_40", "input/3000_40", "input/4000_40", \
+#                 "input/5000_40", "input/6000_40", "input/7000_40", "input/8000_40", "input/9000_40", "input/10000_40"]
+# environments = ["input/40_100", "input/40_500", "input/40_1000", "input/40_1500", "input/40_2000", "input/40_3000", \
+#                 "input/40_4000", "input/40_5000", "input/40_6000", "input/40_7000", "input/40_8000", "input/40_9000", "input/40_10000"]
+environments = ["input/2000_100", "input/2000_500", "input/2000_1000", "input/2000_1500", "input/2000_2000", "input/2000_3000"]
+                # "input/2000_4000", "input/2000_5000", "input/2000_6000", "input/2000_7000", "input/2000_8000", "input/2000_9000", "input/2000_10000"]
 
 
 # 定义重复执行的次数
@@ -55,7 +59,7 @@ for steps in steps_list:
             serial_command = [serial_program, str(steps), env, '1', 'output/serial.txt']
             start_time = time.time()
             try:
-                subprocess.run(serial_command, check=True, capture_output=True, timeout=20)
+                subprocess.run(serial_command, check=True, capture_output=True, timeout=60)
                 serial_times.append(time.time() - start_time)
                 print(f"    第 {i+1} 次执行时间：{serial_times[-1]:.4f} 秒")
             except subprocess.CalledProcessError as e:
@@ -79,7 +83,7 @@ for steps in steps_list:
             parallel_command = [parallel_program, str(steps), env, '4', 'output/parallel.txt']
             start_time = time.time()
             try:
-                subprocess.run(parallel_command, check=True, capture_output=True, timeout=20)
+                subprocess.run(parallel_command, check=True, capture_output=True, timeout=60)
                 parallel_times.append(time.time() - start_time)
                 print(f"    第 {i+1} 次执行时间：{parallel_times[-1]:.4f} 秒")
             except subprocess.CalledProcessError as e:

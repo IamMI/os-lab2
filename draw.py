@@ -22,7 +22,7 @@ def parse_md_table(filepath):
             cols = int(env.split('_')[0])
             rows = int(env.split('_')[1])
             speedup = float(parts[4].replace('x', '').strip())
-            parsed_data.append((steps, rows, speedup))
+            parsed_data.append((steps, cols, speedup))
         except ValueError:
             continue  # 忽略无法解析的行
 
@@ -42,14 +42,16 @@ def plot_speedup(data):
         plt.plot(sorted_cols, sorted_speedups, marker='o', label=f"Steps = {steps}")
 
     plt.xlabel("Columns")
+    # plt.xlabel("Rows")
     plt.ylabel("Speedup")
+    # plt.title("Speedup vs Rows for Different Steps")
     plt.title("Speedup vs Columns for Different Steps")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
     # plt.show()
+    # plt.savefig("Speedup-rows.png", dpi=300)
     plt.savefig("Speedup-cols.png", dpi=300)
-
 
 if __name__ == "__main__":
     filepath = "execution_results_average.md"  # 将此处替换为你的 md 文件名

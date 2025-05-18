@@ -17,7 +17,7 @@ typedef struct {
 } META;
 
 
-#define MAX_THREADS 20
+#define MAX_THREADS 100
 META* metaData = NULL;
 
 //
@@ -172,7 +172,7 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
     // Free
     destroy_metaData(metaData, pools);
     destroy_life_board(next_state);
-    return;
+    
 
     // LifeBoard* next_state = create_life_board(state->width, state->height);
     // pthread_t t[MAX_THREADS];
@@ -203,7 +203,9 @@ void simulate_life_parallel(int threads, LifeBoard *state, int steps) {
     //     free(metaData[i]);       
     // }
     // destroy_life_board(next_state);
-    // return;
+    
+    
+    return;
 }
 
 

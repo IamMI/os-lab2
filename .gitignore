@@ -8,11 +8,9 @@ life
 life-asan
 life-tsan
 conf/info.mk
-*.pdf
 *.zip
 demo*
 *.png
-*.md
 *.Identifier
 output/*
 input/*
